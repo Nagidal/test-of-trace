@@ -1,0 +1,19 @@
+[package]
+name = "test-of-trace"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tracing = "0.1.37"
+tracing-subscriber = {version = "0.3.16", features = ["env-filter", "registry"]}
+
+[dev-dependencies]
+cucumber = "0.19"
+futures = "0.3"
+tokio = { version = "1.25", features = ["macros", "rt-multi-thread", "time"] }
+
+[[test]]
+name = "minimal"
+harness = false
