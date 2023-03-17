@@ -1,3 +1,4 @@
 Out-Null
+*.log
 /target
 /Cargo.lock

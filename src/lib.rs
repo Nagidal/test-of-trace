@@ -1,3 +1,4 @@
+pub mod logger;
 use tracing::{info, trace};
 
 pub fn add(left: usize, right: usize) -> usize {
