@@ -19,6 +19,5 @@ fn main() {
     install_tracing();
     trace!("Starting {}", env!("CARGO_PKG_NAME"));
     test_of_trace::add(5, 8);
-    test_of_trace::print_levels();
     trace!("Finishing {}", env!("CARGO_PKG_NAME"));
 }
