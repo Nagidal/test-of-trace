@@ -10,39 +10,71 @@ use test_of_trace;
 pub struct TestWorld {}
 
 impl TestWorld {
-    #[instrument]
     fn new() -> Self {
-        fmt()
-            .without_time()
-            .with_line_number(true)
-            .with_max_level(Level::TRACE)
-            .json()
-            .with_writer(test_of_trace::logger::Logger::new)
-            .init();
+        test_of_trace::logger::clear();
         Self {}
     }
-    fn level_contains(&self, level: &Level, pattern: &str) -> Result<bool, std::io::Error> {
-        let s = test_of_trace::logger::GLOBAL_STRING.lock().unwrap();
-        Ok(s.lines()
-            .filter(|l| l.starts_with(&("{\"level\":\"".to_owned() + level.as_str())))
-            .any(|l| l.contains(pattern)))
-    }
 }
 
-#[when("I call the add function")]
-fn call_add(_world: &mut TestWorld) {
-    test_of_trace::add(3, 4);
+#[when(regex = r"^I call the add function with (?P<left>\d+) and (?P<right>\d+)$")]
+fn call_add(_world: &mut TestWorld, left: usize, right: usize) {
+    test_of_trace::add(left, right);
 }
 
-#[then("a trace is emitted")]
-fn trace_is_emitted(world: &mut TestWorld) {
-    match world.level_contains(&Level::INFO, "result is") {
+#[then(regex = r"^a trace about adding (?P<left>\d+) and (?P<right>\d+) is emitted$")]
+fn adding_trace_is_emitted(_world: &mut TestWorld, left: usize, right: usize) {
+    match test_of_trace::logger::level_contains(
+        &Level::TRACE,
+        &format!("adding {left} and {right}"),
+    ) {
         Ok(val) => assert!(val),
         Err(_) => assert!(false),
     }
 }
 
+#[then(
+    regex = r"the result (?P<result>\d+) is written in the (?P<level>trace|debug|info|warn|error) trace"
+)]
+fn trace_result(_world: &mut TestWorld, result: usize, level: Level) {
+    match test_of_trace::logger::level_contains(&level, &format!("result is {result}")) {
+        Ok(val) => assert!(val),
+        Err(_) => assert!(false),
+    }
+}
+
+#[when(regex = r"^I call the multiply function with (?P<left>\d+) and (?P<right>\d+)$")]
+fn call_multiply(_world: &mut TestWorld, left: usize, right: usize) {
+    test_of_trace::multiply(left, right);
+}
+
+#[then(regex = r"^a trace about multiplying (?P<left>\d+) and (?P<right>\d+) is emitted$")]
+fn multiplying_trace_is_emitted(_world: &mut TestWorld, left: usize, right: usize) {
+    match test_of_trace::logger::level_contains(
+        &Level::TRACE,
+        &format!("multiplying {left} and {right}"),
+    ) {
+        Ok(val) => assert!(val),
+        Err(_) => assert!(false),
+    }
+}
+
+fn install_tracing() {
+    fmt()
+        .without_time()
+        .with_line_number(true)
+        .with_max_level(Level::TRACE)
+        .json()
+        .with_writer(test_of_trace::logger::Logger::new)
+        .init();
+}
+
 #[tokio::main]
+#[instrument]
 async fn main() {
+    install_tracing();
     TestWorld::run("tests/features").await;
+    //TestWorld::cucumber()
+    //.max_concurrent_scenarios(1)
+    //.run("tests/features")
+    //.await;
 }
