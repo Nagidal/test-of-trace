@@ -3,6 +3,7 @@ use std::{
     io::{Error, ErrorKind, Write},
     sync::Mutex,
 };
+use tracing::Level;
 
 pub static GLOBAL_STRING: Lazy<Mutex<String>> = Lazy::new(|| Mutex::new(String::new()));
 
@@ -32,4 +33,16 @@ impl Write for Logger {
     fn flush(&mut self) -> Result<(), Error> {
         Ok(())
     }
+}
+
+pub fn clear() {
+    let mut s = GLOBAL_STRING.lock().unwrap();
+    s.clear()
+}
+
+pub fn level_contains(level: &Level, pattern: &str) -> Result<bool, std::io::Error> {
+    let s = GLOBAL_STRING.lock().unwrap();
+    Ok(s.lines()
+        .filter(|l| l.starts_with(&("{\"level\":\"".to_owned() + level.as_str())))
+        .any(|l| l.contains(pattern)))
 }
