@@ -1,5 +1,5 @@
 use std::io::{Error, ErrorKind, Write};
-use tracing::{info, trace};
+use tracing::{info, trace, Level};
 
 pub fn add(left: usize, right: usize) -> usize {
     trace!("I'm adding");
@@ -8,6 +8,19 @@ pub fn add(left: usize, right: usize) -> usize {
     result
 }
 
+pub fn print_levels() {
+    for level in [
+        Level::TRACE,
+        Level::DEBUG,
+        Level::INFO,
+        Level::WARN,
+        Level::ERROR,
+    ] {
+        println!("{}", level.as_str());
+    }
+}
+
+#[derive(Debug)]
 pub struct LogBuffer {
     data: String,
 }

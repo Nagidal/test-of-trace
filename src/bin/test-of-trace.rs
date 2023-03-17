@@ -1,19 +1,16 @@
 use test_of_trace;
-use tracing::{instrument, trace, Level};
-//use tracing_subscriber::{fmt, EnvFilter};
-use tracing_subscriber::fmt;
+use tracing::{instrument, trace};
+use tracing_subscriber::{fmt, EnvFilter};
 
 fn install_tracing() {
     fmt()
         .without_time()
         .with_line_number(true)
-        //.with_env_filter(
-        //EnvFilter::try_from_default_env()
-        //.or_else(|_| EnvFilter::try_new("trace"))
-        //.unwrap(),
-        //)
-        .with_max_level(Level::TRACE)
-        .with_writer(test_of_trace::LogBuffer::new)
+        .with_env_filter(
+            EnvFilter::try_from_default_env()
+                .or_else(|_| EnvFilter::try_new("trace"))
+                .unwrap(),
+        )
         .init();
 }
 
@@ -22,6 +19,6 @@ fn main() {
     install_tracing();
     trace!("Starting {}", env!("CARGO_PKG_NAME"));
     test_of_trace::add(5, 8);
+    test_of_trace::print_levels();
     trace!("Finishing {}", env!("CARGO_PKG_NAME"));
-    // try our custom writer
 }
